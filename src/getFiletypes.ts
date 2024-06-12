@@ -10,12 +10,18 @@ async function getOctokit() {
   });
 }
 
+type Tallies = { [ext: string]: number };
+export type RepoWithFiletypes = Repo & {
+  packageJSONs: string[];
+  tallies: Tallies;
+};
+
 async function getFiletypes(
+  octokit: any, // todo
   owner: string,
   repo: string,
   branch: string
-): Promise<{ [ext: string]: number }> {
-  const octokit = await getOctokit();
+): Promise<{ packageJSONs: string[]; tallies: Tallies }> {
   const res = await octokit.request(
     `GET /repos/{owner}/{repo}/git/trees/{branch}?recursive=1`,
     {
@@ -27,10 +33,17 @@ async function getFiletypes(
       },
     }
   );
-
+  const paths: string[] = res.data.tree.map((_) => _.path);
   // todo: handle trees with >100k files
-  return res.data.tree
-    .map((_) => extname(_.path).slice(1))
+  return {
+    packageJSONs: paths.filter((_) => _.endsWith("package.json")),
+    tallies: computeTallies(paths),
+  };
+}
+
+function computeTallies(paths: string[]): Tallies {
+  return paths
+    .map((_) => extname(_).slice(1))
     .filter(Boolean)
     .reduce((tallies, ext) => {
       if (!tallies.hasOwnProperty(ext)) {
@@ -41,15 +54,19 @@ async function getFiletypes(
     }, {});
 }
 
-export type RepoWithFiletypes = Repo & { tallies: { [ext: string]: number } };
-
 async function main() {
+  const octokit = await getOctokit();
   const repos: Repo[] = require("../data/repos.json");
   const tallies = await Promise.all(
     repos.map(async (_) => {
-      const tallies = await getFiletypes(_.owner, _.repo, _.branch);
+      const { packageJSONs, tallies } = await getFiletypes(
+        octokit,
+        _.owner,
+        _.repo,
+        _.branch
+      );
       console.info(`got filetypes for ${_.owner}/${_.repo}`);
-      return { ..._, tallies };
+      return { ..._, packageJSONs, tallies };
     })
   );
   console.log(`got ${tallies.length} filetypes`);

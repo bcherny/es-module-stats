@@ -46,7 +46,10 @@ function main() {
     });
     console.log(`counted totals for ${_.owner}/${_.repo}`);
   });
-  writeFileSync("data/totals.json", JSON.stringify(totals, null, 4));
+  writeFileSync(
+    "data/totals-by-filetype.json",
+    JSON.stringify(totals, null, 4)
+  );
 }
 
 main();
