@@ -9,6 +9,7 @@
     "@types/node": "^20.14.2",
     "dotenv": "^16.4.5",
     "octokit": "^4.0.2",
+    "p-all": "^5.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }

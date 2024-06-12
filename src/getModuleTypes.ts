@@ -27,11 +27,13 @@ type TODO = any;
 
 async function main() {
   const octokit = await getOctokit();
+  const all = await import("p-all"); // todo
+
   const tallies: RepoWithFiletypes[] = require("../data/filetypes.json");
-  await Promise.all(
+  await all.default(
     tallies
       .filter((_) => !("moduleTypes" in _))
-      .map(async (_) => {
+      .map((_) => async () => {
         (_ as TODO).moduleTypes = (
           await Promise.all(
             (_.packageJSONs ?? []).map((p) =>
@@ -48,7 +50,8 @@ async function main() {
 
         // save each time since this endpoint tends to get rate limited
         writeFileSync("data/filetypes.json", JSON.stringify(tallies, null, 4));
-      })
+      }),
+    { concurrency: 100 } // github limit
   );
   console.log(`got ${tallies.length} module types`);
 }
