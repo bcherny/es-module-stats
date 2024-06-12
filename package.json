@@ -1,0 +1,15 @@
+{
+  "name": "es-module-stats",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.14.2",
+    "dotenv": "^16.4.5",
+    "octokit": "^4.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
