@@ -8,6 +8,6 @@ $ npx ts-node src/getModuleTypes.ts
 $ npx ts-node src/getTotals.ts
 ```
 
-# TODO
+## Future improvements
 
-- [] Count package.json declarations, too
+- Get a more accurate count, computing whether each file is an ESM or not (requires moving package.json type collection first)

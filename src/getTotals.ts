@@ -1,10 +1,107 @@
 import { writeFileSync } from "fs";
-import { RepoWithFiletypes } from "./getFiletypes";
+import { RepoWithFiletypesAndModuleTypes } from "./getModuleTypes";
 
 function main() {
-  const tallies: RepoWithFiletypes[] = require("../data/filetypes.json");
+  const tallies: RepoWithFiletypesAndModuleTypes[] = require("../data/filetypes.json");
+
+  const js = tallies.filter((_) => _.language === "javascript");
+  const ts = tallies.filter((_) => _.language === "typescript");
+
+  // modules
+  const modules = {
+    percentOfReposThatHaveAtLeastOnePackageJSONWhereTypeIsDefined: {
+      javascript:
+        js.reduce(
+          (p, c) =>
+            c.moduleTypes.hasOwnProperty("module") ||
+            c.moduleTypes.hasOwnProperty("commonjs")
+              ? p + 1
+              : p,
+          0
+        ) / tallies.length,
+      typescript:
+        ts.reduce(
+          (p, c) =>
+            c.moduleTypes.hasOwnProperty("module") ||
+            c.moduleTypes.hasOwnProperty("commonjs")
+              ? p + 1
+              : p,
+          0
+        ) / tallies.length,
+    },
+    percentOfReposThatHaveAtLeastOnePackageJSONWhereTypeIsModule: {
+      javascript:
+        js.reduce(
+          (p, c) => (c.moduleTypes.hasOwnProperty("module") ? p + 1 : p),
+          0
+        ) / tallies.length,
+      typescript:
+        ts.reduce(
+          (p, c) => (c.moduleTypes.hasOwnProperty("module") ? p + 1 : p),
+          0
+        ) / tallies.length,
+    },
+    percentOfPackageJSONsWhereTypeIsDefined: {
+      javascript:
+        js.reduce(
+          (p, c) =>
+            p + (c.moduleTypes.module ?? 0) + (c.moduleTypes.commonjs ?? 0),
+          0
+        ) /
+        js.reduce(
+          (p, c) =>
+            p +
+            (c.moduleTypes.module ?? 0) +
+            (c.moduleTypes.commonjs ?? 0) +
+            (c.moduleTypes.undefined ?? 0),
+          0
+        ),
+      typescript:
+        ts.reduce(
+          (p, c) =>
+            p + (c.moduleTypes.module ?? 0) + (c.moduleTypes.commonjs ?? 0),
+          0
+        ) /
+        ts.reduce(
+          (p, c) =>
+            p +
+            (c.moduleTypes.module ?? 0) +
+            (c.moduleTypes.commonjs ?? 0) +
+            (c.moduleTypes.undefined ?? 0),
+          0
+        ),
+    },
+    percentOfPackageJSONsWhereTypeIsModule: {
+      javascript:
+        js.reduce((p, c) => p + (c.moduleTypes.module ?? 0), 0) /
+        js.reduce(
+          (p, c) =>
+            p +
+            (c.moduleTypes.module ?? 0) +
+            (c.moduleTypes.commonjs ?? 0) +
+            (c.moduleTypes.undefined ?? 0),
+          0
+        ),
+      typescript:
+        ts.reduce((p, c) => p + (c.moduleTypes.module ?? 0), 0) /
+        ts.reduce(
+          (p, c) =>
+            p +
+            (c.moduleTypes.module ?? 0) +
+            (c.moduleTypes.commonjs ?? 0) +
+            (c.moduleTypes.undefined ?? 0),
+          0
+        ),
+    },
+  };
+
+  // filetypes
   const totals = {
-    javascript: {
+    percentOfFilesThatUseJSModuleFileExtensions: {
+      javascript: 0,
+      typescript: 0,
+    },
+    rawCountsJavascript: {
       // js
       js: 0,
       jsx: 0,
@@ -20,7 +117,7 @@ function main() {
       mts: 0,
       mtsx: 0,
     },
-    typescript: {
+    rawCountsTypescript: {
       // js
       js: 0,
       jsx: 0,
@@ -39,16 +136,65 @@ function main() {
   };
   tallies.forEach((_) => {
     Object.entries(_.tallies).forEach(([ext, tally]) => {
-      if (!totals[_.language].hasOwnProperty(ext)) {
+      const obj =
+        _.language === "javascript"
+          ? totals.rawCountsJavascript
+          : totals.rawCountsTypescript;
+      if (!obj.hasOwnProperty(ext)) {
         return;
       }
-      totals[_.language][ext] += tally;
+      obj[ext] += tally;
     });
     console.log(`counted totals for ${_.owner}/${_.repo}`);
   });
+
+  totals.percentOfFilesThatUseJSModuleFileExtensions.javascript =
+    (totals.rawCountsJavascript.cjs +
+      totals.rawCountsJavascript.cjsx +
+      totals.rawCountsJavascript.mjs +
+      totals.rawCountsJavascript.mjsx +
+      totals.rawCountsTypescript.cjs +
+      totals.rawCountsTypescript.cjsx +
+      totals.rawCountsTypescript.mjs +
+      totals.rawCountsTypescript.mjsx) /
+    (totals.rawCountsJavascript.cjs +
+      totals.rawCountsJavascript.cjsx +
+      totals.rawCountsJavascript.js +
+      totals.rawCountsJavascript.jsx +
+      totals.rawCountsJavascript.mjs +
+      totals.rawCountsJavascript.mjsx +
+      totals.rawCountsTypescript.cjs +
+      totals.rawCountsTypescript.cjsx +
+      totals.rawCountsTypescript.js +
+      totals.rawCountsTypescript.jsx +
+      totals.rawCountsTypescript.mjs +
+      totals.rawCountsTypescript.mjsx);
+
+  totals.percentOfFilesThatUseJSModuleFileExtensions.typescript =
+    (totals.rawCountsJavascript.cts +
+      totals.rawCountsJavascript.ctsx +
+      totals.rawCountsJavascript.mts +
+      totals.rawCountsJavascript.mtsx +
+      totals.rawCountsTypescript.cts +
+      totals.rawCountsTypescript.ctsx +
+      totals.rawCountsTypescript.mts +
+      totals.rawCountsTypescript.mtsx) /
+    (totals.rawCountsJavascript.cts +
+      totals.rawCountsJavascript.ctsx +
+      totals.rawCountsJavascript.ts +
+      totals.rawCountsJavascript.tsx +
+      totals.rawCountsJavascript.mts +
+      totals.rawCountsJavascript.mtsx +
+      totals.rawCountsTypescript.cts +
+      totals.rawCountsTypescript.ctsx +
+      totals.rawCountsTypescript.ts +
+      totals.rawCountsTypescript.tsx +
+      totals.rawCountsTypescript.mts +
+      totals.rawCountsTypescript.mtsx);
+
   writeFileSync(
-    "data/totals-by-filetype.json",
-    JSON.stringify(totals, null, 4)
+    "data/totals.json",
+    JSON.stringify({ ...modules, ...totals }, null, 4)
   );
 }
 

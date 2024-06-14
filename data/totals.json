@@ -1,0 +1,50 @@
+{
+    "percentOfReposThatHaveAtLeastOnePackageJSONWhereTypeIsDefined": {
+        "javascript": 0.0835214446952596,
+        "typescript": 0.1930022573363431
+    },
+    "percentOfReposThatHaveAtLeastOnePackageJSONWhereTypeIsModule": {
+        "javascript": 0.077313769751693,
+        "typescript": 0.1811512415349887
+    },
+    "percentOfPackageJSONsWhereTypeIsDefined": {
+        "javascript": 0.08625493382865103,
+        "typescript": 0.1257721674404328
+    },
+    "percentOfPackageJSONsWhereTypeIsModule": {
+        "javascript": 0.07824471790109125,
+        "typescript": 0.11683229098722327
+    },
+    "percentOfFilesThatUseJSModuleFileExtensions": {
+        "javascript": 0.06278512064381941,
+        "typescript": 0.0013090016888752947
+    },
+    "rawCountsJavascript": {
+        "js": 192744,
+        "jsx": 7512,
+        "cjs": 1158,
+        "cjsx": 102,
+        "mjs": 13915,
+        "mjsx": 0,
+        "ts": 24591,
+        "tsx": 9678,
+        "cts": 27,
+        "ctsx": 0,
+        "mts": 87,
+        "mtsx": 0
+    },
+    "rawCountsTypescript": {
+        "js": 120541,
+        "jsx": 3186,
+        "cjs": 1561,
+        "cjsx": 0,
+        "mjs": 4968,
+        "mjsx": 0,
+        "ts": 420880,
+        "tsx": 152152,
+        "cts": 126,
+        "ctsx": 0,
+        "mts": 555,
+        "mtsx": 1
+    }
+}
