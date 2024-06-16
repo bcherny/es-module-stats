@@ -2,7 +2,7 @@ import { writeFileSync } from "fs";
 import { RepoWithFiletypesAndModuleTypes } from "./getModuleTypes";
 
 function main() {
-  const tallies: RepoWithFiletypesAndModuleTypes[] = require("../data/filetypes.json");
+  const tallies: RepoWithFiletypesAndModuleTypes[] = require("../data/filetypes-and-modules.json");
 
   const js = tallies.filter((_) => _.language === "javascript");
   const ts = tallies.filter((_) => _.language === "typescript");

@@ -96,7 +96,10 @@ async function main() {
     }
 
     // save each time since this endpoint tends to get rate limited
-    writeFileSync("data/filetypes.json", JSON.stringify(tallies, null, 4));
+    writeFileSync(
+      "data/filetypes-and-modules.json",
+      JSON.stringify(tallies, null, 4)
+    );
   }
 }
 

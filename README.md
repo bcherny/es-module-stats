@@ -1,3 +1,9 @@
+# Pull NPM data
+
+```sh
+$ curl -L -O https://replicate.npmjs.com/_all_docs
+```
+
 # Generate data
 
 ```sh
