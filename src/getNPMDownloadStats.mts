@@ -15,33 +15,32 @@ async function fetchDownloadsScoped(
   if (!packageNames.length) {
     return [];
   }
-  const responses = await Promise.all(
-    packageNames.map((_) =>
-      fetch(`https://api.npmjs.org/downloads/point/last-week/${_}`)
-    )
+  return await Promise.all(packageNames.map(fetchDownloadScoped));
+}
+
+async function fetchDownloadScoped(
+  packageName: string
+): Promise<number | null> {
+  const _ = await fetch(
+    `https://api.npmjs.org/downloads/point/last-week/${packageName}`
   );
-  const jsons = await Promise.all(
-    responses.map((_) => {
-      if (_.ok) {
-        return _.json();
-      }
-      switch (_.statusText) {
-        case "Not Found":
-          return { downloads: null };
-        case "Too Many Requests":
-          console.error(
-            `Rate limited. Waiting ${RETRY_WAIT_TIME_SECONDS} seconds.`
-          );
-          return setTimeoutPromise(
-            () => fetchDownloadsScoped(packageNames),
-            RETRY_WAIT_TIME_SECONDS * 1000
-          );
-        default:
-          throw Error(_.statusText);
-      }
-    })
-  );
-  return jsons.map((_) => (_ as { downloads: number | null }).downloads);
+  if (_.ok) {
+    return ((await _.json()) as { downloads: number | null }).downloads;
+  }
+  switch (_.statusText) {
+    case "Not Found":
+      return null;
+    case "Too Many Requests":
+      console.error(
+        `Request for ${packageName} was rate limited. Retrying in ${RETRY_WAIT_TIME_SECONDS} seconds.`
+      );
+      return setTimeoutPromise(
+        () => fetchDownloadScoped(packageName),
+        RETRY_WAIT_TIME_SECONDS * 1000
+      );
+    default:
+      throw Error(_.statusText);
+  }
 }
 
 function setTimeoutPromise<A>(f: () => Promise<A>, t: number): Promise<A> {
@@ -94,6 +93,7 @@ async function* readFileChunked(filePath: string): AsyncGenerator<string[]> {
   }
 }
 
+// parses json without parsing json, since it won't have opening/closing {}
 const PREFIX = '{"id":"';
 async function* readPackageNamesChunked(
   filePath: string
