@@ -2,6 +2,7 @@
 
 ```sh
 $ curl -L -O https://replicate.npmjs.com/_all_docs
+$ node --loader ts-node/esm src/getNPMDownloadStats.mts
 ```
 
 # Generate data
