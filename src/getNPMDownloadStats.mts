@@ -2,7 +2,7 @@ import { createReadStream, readFileSync, writeFileSync } from "fs";
 import fetch from "node-fetch";
 import { createInterface } from "readline";
 
-const NPM_API_CONCURRENCY_LIMIT = 128;
+const NPM_API_CONCURRENCY_LIMIT = 64;
 const OUTPUT_FILENAME = "data/npm-downloads.csv";
 const RETRY_WAIT_TIME_SECONDS = 60 * 10;
 
@@ -67,11 +67,27 @@ async function fetchDownloadsNotScoped(
   if (!packageNames.length) {
     return [];
   }
-  const res = await fetch(
+  const _ = await fetch(
     `https://api.npmjs.org/downloads/point/last-week/${packageNames.join(",")}`
   );
-  const json = await res.json();
-  return packageNames.map((_) => json[_]?.downloads ?? 0);
+  if (_.ok) {
+    const json = await _.json();
+    return packageNames.map((_) => json[_]?.downloads ?? 0);
+  }
+  switch (_.statusText) {
+    case "Not Found":
+      return null;
+    case "Too Many Requests":
+      console.error(
+        `Request for ${packageNames.length} packages was rate limited. Retrying in ${RETRY_WAIT_TIME_SECONDS} seconds.`
+      );
+      return setTimeoutPromise(
+        () => fetchDownloadsNotScoped(packageNames),
+        RETRY_WAIT_TIME_SECONDS * 1000
+      );
+    default:
+      throw Error(await _.text());
+  }
 }
 
 async function* readFileChunked(filePath: string): AsyncGenerator<string[]> {
@@ -122,31 +138,28 @@ async function main() {
   const downloadedPackageNames = getDownloadedPackageNames();
   for await (const packageNames of readPackageNamesChunked("./npm/_all_docs")) {
     // support resuming downloads
-    const packageNamesToDownload = packageNames.filter(
-      (_) => !downloadedPackageNames.has(_)
+    const packageNamesToDownload = packageNames
+      .filter((_) => !downloadedPackageNames.has(_))
+      .filter((_) => !_.startsWith("@"));
+
+    const notScopedDownloads = await fetchDownloadsNotScoped(
+      packageNamesToDownload
+    ).then((downloads) =>
+      packageNamesToDownload.map((_, i) => [_, downloads[i]] as const)
     );
-    const { scoped = [], notScoped = [] } = groupBy(
-      packageNamesToDownload,
-      (_) => (_.startsWith("@") ? "scoped" : "notScoped")
-    );
-    const [scopedDownloads, notScopedDownloads] = await Promise.all([
-      fetchDownloadsScoped(scoped).then((downloads) =>
-        scoped.map((_, i) => [_, downloads[i]] as const)
-      ),
-      fetchDownloadsNotScoped(notScoped).then((downloads) =>
-        notScoped.map((_, i) => [_, downloads[i]] as const)
-      ),
-    ]);
-    writeFileSync(
-      OUTPUT_FILENAME,
-      [...scopedDownloads, ...notScopedDownloads]
-        .map(([k, v]) => `${k}, ${v}`)
-        .join("\n") + "\n",
-      { flag: "a" }
-    );
-    [...scoped, ...notScoped].forEach((_) => {
-      console.log(`wrote download counts for ${_} to ${OUTPUT_FILENAME}`);
-    });
+    if (notScopedDownloads.length) {
+      writeFileSync(
+        OUTPUT_FILENAME,
+        notScopedDownloads
+          .map(([k, v]) => `${k}, ${v}`)
+          .filter(Boolean)
+          .join("\n") + "\n",
+        { flag: "a" }
+      );
+      packageNamesToDownload.forEach((_) => {
+        console.log(`wrote download counts for ${_} to ${OUTPUT_FILENAME}`);
+      });
+    }
   }
 }
 
