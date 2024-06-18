@@ -1,8 +1,8 @@
 import { createReadStream, readFileSync, writeFileSync } from "fs";
-import fetch from "node-fetch";
+import fetch, { FetchError } from "node-fetch";
 import { createInterface } from "readline";
 
-const NPM_API_CONCURRENCY_LIMIT = 64;
+const NPM_API_CONCURRENCY_LIMIT = 20;
 const OUTPUT_FILENAME = "data/npm-downloads.csv";
 const RETRY_WAIT_TIME_SECONDS = 60 * 10;
 
@@ -21,25 +21,36 @@ async function fetchDownloadsScoped(
 async function fetchDownloadScoped(
   packageName: string
 ): Promise<number | null> {
-  const _ = await fetch(
-    `https://api.npmjs.org/downloads/point/last-week/${packageName}`
-  );
-  if (_.ok) {
-    return ((await _.json()) as { downloads: number | null }).downloads;
-  }
-  switch (_.statusText) {
-    case "Not Found":
-      return null;
-    case "Too Many Requests":
-      console.error(
-        `Request for ${packageName} was rate limited. Retrying in ${RETRY_WAIT_TIME_SECONDS} seconds.`
-      );
-      return setTimeoutPromise(
-        () => fetchDownloadScoped(packageName),
-        RETRY_WAIT_TIME_SECONDS * 1000
-      );
-    default:
-      throw Error(_.statusText);
+  try {
+    const _ = await fetch(
+      `https://api.npmjs.org/downloads/point/last-week/${packageName}`
+    );
+    if (_.ok) {
+      return ((await _.json()) as { downloads: number | null }).downloads;
+    }
+    switch (_.statusText) {
+      case "Not Found":
+        return null;
+      case "Too Many Requests":
+        console.error(
+          `Request for ${packageName} was rate limited. Retrying in ${RETRY_WAIT_TIME_SECONDS} seconds.`
+        );
+        return setTimeoutPromise(
+          () => fetchDownloadScoped(packageName),
+          RETRY_WAIT_TIME_SECONDS * 1000
+        );
+      default:
+        console.error(
+          `Error fetching downloads for ${packageName}: ` + (await _.text())
+        );
+        return null;
+    }
+  } catch (e) {
+    // npm api socket hangs up sometimes
+    if (e instanceof FetchError) {
+      return await fetchDownloadScoped(packageName);
+    }
+    throw e;
   }
 }
 
@@ -136,28 +147,38 @@ function groupBy<A, B extends string>(as: A[], f: (a: A) => B): Record<B, A[]> {
 
 async function main() {
   const downloadedPackageNames = getDownloadedPackageNames();
+
+  const numStart = downloadedPackageNames.size;
+  const numTotal =
+    readFileSync("./npm/_all_docs", "utf8").split("\n").length - 1;
+  let numDownloaded = 0;
+
   for await (const packageNames of readPackageNamesChunked("./npm/_all_docs")) {
     // support resuming downloads
     const packageNamesToDownload = packageNames
       .filter((_) => !downloadedPackageNames.has(_))
-      .filter((_) => !_.startsWith("@"));
+      .filter((_) => _.startsWith("@"));
 
-    const notScopedDownloads = await fetchDownloadsNotScoped(
-      packageNamesToDownload
-    ).then((downloads) =>
-      packageNamesToDownload.map((_, i) => [_, downloads[i]] as const)
+    const downloads = await fetchDownloadsScoped(packageNamesToDownload).then(
+      (d) => packageNamesToDownload.map((_, i) => [_, d[i]] as const)
     );
-    if (notScopedDownloads.length) {
+    if (downloads.length) {
       writeFileSync(
         OUTPUT_FILENAME,
-        notScopedDownloads
+        downloads
           .map(([k, v]) => `${k}, ${v}`)
           .filter(Boolean)
           .join("\n") + "\n",
         { flag: "a" }
       );
+      numDownloaded += downloads.length;
       packageNamesToDownload.forEach((_) => {
-        console.log(`wrote download counts for ${_} to ${OUTPUT_FILENAME}`);
+        const progress = Math.round(
+          (100 * (numStart + numDownloaded)) / numTotal
+        );
+        console.log(
+          `${progress}% wrote download counts for ${_} to ${OUTPUT_FILENAME}`
+        );
       });
     }
   }
