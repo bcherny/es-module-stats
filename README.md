@@ -40,18 +40,18 @@ tl;dr:
 
 ```sh
 $ curl -L -O https://replicate.npmjs.com/_all_docs
-$ node --loader ts-node/esm src/getNPMDownloadStats.mts
-$ node --loader ts-node/esm src/getTopNPMRepos.mts
-$ node --loader ts-node/esm src/getNPMModuleTypes.mts
-$ node --loader ts-node/esm src/getNPMTotals.mts
+$ node --loader ts-node/esm src/getNPMDownloadStats.ts
+$ node --loader ts-node/esm src/getTopNPMRepos.ts
+$ node --loader ts-node/esm src/getNPMModuleTypes.ts
+$ node --loader ts-node/esm src/getNPMTotals.ts
 ```
 
 ## Generate data
 
 ```sh
 $ npm install
-$ node --loader ts-node/esm src/getRepos.mts
-$ node --loader ts-node/esm src/getFiletypes.mts
-$ node --loader ts-node/esm src/getModuleTypes.mts
-$ node --loader ts-node/esm src/getTotals.mts
+$ node --loader ts-node/esm src/getRepos.ts
+$ node --loader ts-node/esm src/getFiletypes.ts
+$ node --loader ts-node/esm src/getModuleTypes.ts
+$ node --loader ts-node/esm src/getTotals.ts
 ```

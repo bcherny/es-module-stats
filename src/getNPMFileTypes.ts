@@ -1,9 +1,9 @@
 import { readFileSync, writeFileSync } from "fs";
 import all from "p-all";
 import { extname } from "path";
-import { ModuleType } from "./getNPMModuleTypes.mjs";
-import { FiletypeTallies, Tallies, getFiletypes } from "./getFiletypes.mjs";
-import { octokit } from "./octokit.mjs";
+import { ModuleType } from "./getNPMModuleTypes.js";
+import { FiletypeTallies, Tallies, getFiletypes } from "./getFiletypes.js";
+import { octokit } from "./octokit.js";
 
 const INPUT = "./data/top-1k-npm-downloads.json";
 const OUTPUT = "./data/top-1k-npm-downloads-file-types.json";

@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { readFileSync, writeFileSync } from "fs";
-import { RepoWithFiletypes } from "./getFiletypes.mjs";
+import { RepoWithFiletypes } from "./getFiletypes.js";
 
 export type RepoWithFiletypesAndModuleTypes = RepoWithFiletypes & {
   moduleTypes: { [k: string]: number };

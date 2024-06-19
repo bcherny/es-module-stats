@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "fs";
-import { type ModuleType } from "./getNPMModuleTypes.mjs";
+import { type ModuleType } from "./getNPMModuleTypes.js";
 
 function main() {
   const fileTypes: {

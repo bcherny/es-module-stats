@@ -1,7 +1,7 @@
 import { extname } from "path";
-import { Repo } from "./getRepos.mjs";
+import { Repo } from "./getRepos.js";
 import { readFileSync, writeFileSync } from "fs";
-import { octokit } from "./octokit.mjs";
+import { octokit } from "./octokit.js";
 
 export type Tallies = { [ext: string]: number };
 export type RepoWithFiletypes = Repo & {
