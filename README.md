@@ -15,20 +15,26 @@ tl;dr:
 1. Adoption of ES Modules is between 8-27%, depending how you measure it
 2. Adoption of ES Modules is between 9-27% via package.json, and 0-6% via file extension
 
-### Github (1.8k most popular JS/TS repos)
+### Github
 
-|                                                                  | JavaScript | TypeScript |
+1.8k most popular JS/TS repos, via Github API
+
+| Metric                                                           | JavaScript | TypeScript |
 | ---------------------------------------------------------------- | ---------- | ---------- |
 | % of package.jsons that have a `type` field                      | 9%         | 13%        |
 | % of package.jsons that have `type=module`                       | 8%         | 12%        |
 | % of files that use ESM file extensions (.mjs, .cjs, .mts, etc.) | 6%         | <1%        |
 
-### NPM (935 packages with the most weekly downloads)
+### NPM
 
-| % of package.jsons that have a `type` field (or `exports` field with `commonjs` or `module` defined) | 27%
-| % of package.jsons that have `type=module` | 16%
-| % of files that use ESM file extensions (.mjs, .cjs, .mts, etc.) | <1%
-| % of files that are ES modules (either via package.json or via file extension) | 22%
+935 packages with the most weekly downloads, via NPM API
+
+| Metric                                                                                               | %   |
+| ---------------------------------------------------------------------------------------------------- | --- |
+| % of package.jsons that have a `type` field (or `exports` field with `commonjs` or `module` defined) | 27% |
+| % of package.jsons that have `type=module`                                                           | 16% |
+| % of files that use ESM file extensions (.mjs, .cjs, .mts, etc.)                                     | <1% |
+| % of files that are ES modules (either via package.json or via file extension)                       | 22% |
 
 ## Pull NPM data
 
