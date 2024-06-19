@@ -1,9 +1,10 @@
 {
   "name": "es-module-stats",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
   "description": "",
   "type": "module",
-  "author": "",
+  "author": "Boris Cherny <boris@borischerny.com>",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^20.14.2",
