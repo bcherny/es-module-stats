@@ -1,0 +1,20 @@
+{
+    "percentOfPackageJSONsWhereTypeOrExportsIsDefined": 0.267,
+    "percentOfPackagesThatAreModules": 0.159,
+    "percentOfFilesThatUseJSModuleFileExtensions": 0.006065425668679109,
+    "percentOfFilesThatAreJSModules": 0.2206693745881566,
+    "rawCounts": {
+        "js": 1826801,
+        "jsx": 677,
+        "cjs": 9013,
+        "cjsx": 0,
+        "mjs": 229140,
+        "mjsx": 0,
+        "ts": 705115,
+        "tsx": 2307,
+        "cts": 3095,
+        "ctsx": 0,
+        "mts": 1222,
+        "mtsx": 0
+    }
+}

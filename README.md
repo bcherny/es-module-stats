@@ -10,13 +10,25 @@ Also see [this history](https://gist.github.com/jkrems/769a8cd8806f7f57903b641c7
 
 ## Results
 
-Github (1.8k most popular JS/TS repos)
+tl;dr:
+
+1. Adoption of ES Modules is between 8-27%, depending how you measure it
+2. Adoption of ES Modules is between 9-27% via package.json, and 0-6% via file extension
+
+### Github (1.8k most popular JS/TS repos)
 
 |                                                                  | JavaScript | TypeScript |
 | ---------------------------------------------------------------- | ---------- | ---------- |
 | % of package.jsons that have a `type` field                      | 9%         | 13%        |
 | % of package.jsons that have `type=module`                       | 8%         | 12%        |
 | % of files that use ESM file extensions (.mjs, .cjs, .mts, etc.) | 6%         | <1%        |
+
+### NPM (935 packages with the most weekly downloads)
+
+| % of package.jsons that have a `type` field (or `exports` field with `commonjs` or `module` defined) | 27%
+| % of package.jsons that have `type=module` | 16%
+| % of files that use ESM file extensions (.mjs, .cjs, .mts, etc.) | <1%
+| % of files that are ES modules (either via package.json or via file extension) | 22%
 
 ## Pull NPM data
 
@@ -25,18 +37,15 @@ $ curl -L -O https://replicate.npmjs.com/_all_docs
 $ node --loader ts-node/esm src/getNPMDownloadStats.mts
 $ node --loader ts-node/esm src/getTopNPMRepos.mts
 $ node --loader ts-node/esm src/getNPMModuleTypes.mts
+$ node --loader ts-node/esm src/getNPMTotals.mts
 ```
 
 ## Generate data
 
 ```sh
 $ npm install
-$ npx ts-node src/getRepos.ts
-$ npx ts-node src/getFiletypes.ts
-$ npx ts-node src/getModuleTypes.ts
-$ npx ts-node src/getTotals.ts
+$ node --loader ts-node/esm src/getRepos.mts
+$ node --loader ts-node/esm src/getFiletypes.mts
+$ node --loader ts-node/esm src/getModuleTypes.mts
+$ node --loader ts-node/esm src/getTotals.mts
 ```
-
-## Future improvements
-
-- Get a more accurate count, computing whether each file is an ESM or not (requires moving package.json type collection first)

@@ -45,8 +45,6 @@ async function getModuleTypeFromPackageJSON(
   }
 }
 
-type TODO = any;
-
 async function main() {
   const octokit = await getOctokit();
   const all = (await import("p-all")).default; // todo

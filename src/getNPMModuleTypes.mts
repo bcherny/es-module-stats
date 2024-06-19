@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 import all from "p-all";
 
 const INPUT = "./data/top-1k-npm-downloads.json";
-const OUTPUT = "./data/top-1k-npm-downloads-package-types.json";
+const OUTPUT = "./data/top-1k-npm-downloads-module-types.json";
 
 export type ModuleType = "module" | "commonjs" | "ts-typing";
 
@@ -14,12 +14,12 @@ async function getModuleTypeFromPackageName(
     console.log(
       `error fetching moduleType for ${packageName}: ${res.statusText}`
     );
-    return undefined;
+    return null;
   }
   const json = await res.json();
   console.log(`fetched moduleType for ${packageName}:`, json.type);
   if (json.type) {
-    return json.type;
+    return json.type || null;
   }
   if (typeof json.exports == "object") {
     if (json.exports.import) {
@@ -29,6 +29,7 @@ async function getModuleTypeFromPackageName(
       return "commonjs";
     }
   }
+  return null;
 }
 
 async function main() {
@@ -36,12 +37,20 @@ async function main() {
     [repo: string]: number;
   };
 
+  const packageNames = Object.keys(input);
   const moduleTypes = await all(
-    Object.keys(input).map((_) => () => getModuleTypeFromPackageName(_)),
+    packageNames.map((_) => () => getModuleTypeFromPackageName(_)),
     { concurrency: 2 } // don't get rate limited
   );
 
-  writeFileSync(OUTPUT, JSON.stringify(moduleTypes, null, 4));
+  writeFileSync(
+    OUTPUT,
+    JSON.stringify(Object.fromEntries(zip(packageNames, moduleTypes)), null, 4)
+  );
+}
+
+function zip<A, B>(as: A[], bs: B[]): [A, B][] {
+  return as.map((a, i) => [a, bs[i]]);
 }
 
 main();
