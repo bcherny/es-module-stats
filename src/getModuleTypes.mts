@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { writeFileSync } from "fs";
-import { RepoWithFiletypes } from "./getFiletypes";
+import { readFileSync, writeFileSync } from "fs";
+import { RepoWithFiletypes } from "./getFiletypes.mjs";
 
 export type RepoWithFiletypesAndModuleTypes = RepoWithFiletypes & {
   moduleTypes: { [k: string]: number };
@@ -52,7 +52,9 @@ async function main() {
   const all = (await import("p-all")).default; // todo
 
   const tallies = (
-    require("../data/filetypes.json") as RepoWithFiletypes[]
+    JSON.parse(
+      readFileSync("./data/filetypes.json", "utf8")
+    ) as RepoWithFiletypes[]
   ).filter((_) => !("moduleTypes" in _));
 
   for (const tally of tallies) {

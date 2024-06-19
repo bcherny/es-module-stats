@@ -1,27 +1,21 @@
-import "dotenv/config";
 import { extname } from "path";
-import { Repo } from "./getRepos";
-import { writeFileSync } from "fs";
+import { Repo } from "./getRepos.mjs";
+import { readFileSync, writeFileSync } from "fs";
+import { octokit } from "./octokit.mjs";
 
-async function getOctokit() {
-  const { Octokit } = await import("octokit"); // todo
-  return new Octokit({
-    auth: process.env.GITHUB_TOKEN,
-  });
-}
-
-type Tallies = { [ext: string]: number };
+export type Tallies = { [ext: string]: number };
 export type RepoWithFiletypes = Repo & {
   packageJSONs: string[];
   tallies: Tallies;
 };
 
-async function getFiletypes(
-  octokit: any, // todo
+export type FiletypeTallies = { packageJSONs: string[]; tallies: Tallies };
+
+export async function getFiletypes(
   owner: string,
   repo: string,
   branch: string
-): Promise<{ packageJSONs: string[]; tallies: Tallies }> {
+): Promise<FiletypeTallies> {
   const res = await octokit.request(
     `GET /repos/{owner}/{repo}/git/trees/{branch}?recursive=1`,
     {
@@ -55,12 +49,10 @@ function computeTallies(paths: string[]): Tallies {
 }
 
 async function main() {
-  const octokit = await getOctokit();
-  const repos: Repo[] = require("../data/repos.json");
+  const repos: Repo[] = JSON.parse(readFileSync("./data/repos.json", "utf8"));
   const tallies = await Promise.all(
     repos.map(async (_) => {
       const { packageJSONs, tallies } = await getFiletypes(
-        octokit,
         _.owner,
         _.repo,
         _.branch
@@ -72,5 +64,3 @@ async function main() {
   console.log(`got ${tallies.length} filetypes`);
   writeFileSync("data/filetypes.json", JSON.stringify(tallies, null, 4));
 }
-
-main();

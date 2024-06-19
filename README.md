@@ -24,6 +24,7 @@ Github (1.8k most popular JS/TS repos)
 $ curl -L -O https://replicate.npmjs.com/_all_docs
 $ node --loader ts-node/esm src/getNPMDownloadStats.mts
 $ node --loader ts-node/esm src/getTopNPMRepos.mts
+$ node --loader ts-node/esm src/getNPMModuleTypes.mts
 ```
 
 ## Generate data

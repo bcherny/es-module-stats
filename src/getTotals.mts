@@ -1,5 +1,5 @@
 import { writeFileSync } from "fs";
-import { RepoWithFiletypesAndModuleTypes } from "./getModuleTypes";
+import { RepoWithFiletypesAndModuleTypes } from "./getModuleTypes.mjs";
 
 function main() {
   const tallies: RepoWithFiletypesAndModuleTypes[] = require("../data/filetypes-and-modules.json");
